@@ -1,8 +1,24 @@
 import sys
+import pandas as pd
 
 
 def load_data(messages_filepath, categories_filepath):
-    pass
+    '''
+    INPUT:
+    messages_filepath - string, the filepath of the messages dataset
+    categories_filepath - string, the filepath of the categories dataset
+
+    OUTPUT:
+    df - DataFrame, joined data from both datasets
+    '''
+    df_msg = pd.read_csv(messages_filepath)
+    df_cat = pd.read_csv(categories_filepath)
+    df = df_msg.join(df_cat.set_index('id'), on='id')
+
+    if verbose:
+        print(f'\n        messages shape: {df_msg.shape}\n        categories shape: {df_cat.shape}\n        joined shape: {df.shape}\n')
+
+    return df
 
 
 def clean_data(df):
@@ -14,11 +30,14 @@ def save_data(df, database_filename):
 
 
 def main():
-    if len(sys.argv) == 4:
+    if len(sys.argv) >= 4:
 
-        messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
+        messages_filepath, categories_filepath, database_filepath = sys.argv[1:4]
+        if len(sys.argv) == 5 and sys.argv[4] == 'verbose':
+            global verbose
+            verbose = True
 
-        print('Loading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
+        print('\nLoading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
               .format(messages_filepath, categories_filepath))
         df = load_data(messages_filepath, categories_filepath)
 
@@ -40,5 +59,6 @@ def main():
             'disaster_messages.csv disaster_categories.csv DisasterResponse.db')
 
 
+verbose = False
 if __name__ == '__main__':
     main()
