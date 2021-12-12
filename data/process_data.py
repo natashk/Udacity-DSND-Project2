@@ -13,16 +13,95 @@ def load_data(messages_filepath, categories_filepath):
     '''
     df_msg = pd.read_csv(messages_filepath)
     df_cat = pd.read_csv(categories_filepath)
-    df = df_msg.join(df_cat.set_index('id'), on='id')
+    #df = df_msg.join(df_cat.set_index('id'), on='id')
+    #df = pd.concat([df_msg, df_cat], axis=1)
+    df = df_msg.join(df_cat, how='outer', rsuffix='_cat')
 
     if verbose:
         print(f'\n        messages shape: {df_msg.shape}\n        categories shape: {df_cat.shape}\n        joined shape: {df.shape}\n')
-
     return df
 
 
+def clean_duplicates(df):
+    print('    duplicates...')
+
+    if verbose:
+        diff_ids = df[df['id']!=df['id_cat']].shape[0]
+        print(f'\n{diff_ids} rows with different id and id_cat\n')
+    # id == id_cat in all rows, so we can keep only id
+    df = df.drop(columns=['id_cat'])
+    
+    if verbose:
+        print(f'New joined shape: {df.shape}\n')
+        double = df[df.duplicated(keep=False)]
+        print(f'Full duplicates:\n {double}\n')
+        #double.to_csv('double.csv')
+        #print(df_msg[df_msg['id']==24779])
+        #print(df_cat[df_cat['id']==24779])
+
+    # Drop full duplicates
+    df = df.drop_duplicates().reset_index(drop=True)
+
+    if verbose:
+        print(f'\nNo full duplicates shape: {df.shape}\n')
+    
+    df_dupl_id = df[df.duplicated(subset=['id'], keep=False)]
+    if verbose:
+        print('Duplicates in id:')
+        print(df_dupl_id)
+        print('Duplicates, the difference only in "categories":')
+        print(df[df.duplicated(subset=['id','message','original','genre'], keep=False)])
+
+
+    # Duplicates, the difference only in "categories"
+
+
+    #if verbose:
+        #dupl_ids = list(df_dupl_id['id'])
+        #print(f'\n{len(dupl_ids)}:  {dupl_ids}')
+        #print(f'\n{len(list(set(dupl_ids)))}:  {dupl_ids}')
+
+    return df
+
+def clean_missing_values(df):
+    print('    missing values...')
+    if verbose:
+        print(df.isnull().sum())
+
+    return df    
+
+def create_dummies(df):
+    print('    categorical variables (creating dummies)...')
+    df = pd.concat([df, pd.get_dummies(df['genre'])], axis=1).drop(columns=['genre'])
+    if verbose:
+        print(df.head())
+ 
+    categories = df.loc[0,'categories'].replace('-0', '').replace('-1', '').split(';')
+    if verbose:
+        print(f'\n{len(categories)} categories:\n{categories}\n')
+    df_cat = df['categories'].str.split(';', expand=True)
+    col_dict = {i:categories[i] for i in range(36)}
+    if verbose:
+        print(f'\nDictionary of category columns:\n{col_dict}\n')
+    df_cat = df_cat.rename(columns=col_dict)
+    if verbose:
+        print(df_cat.head())
+
+    for col in df_cat.columns:
+        df_cat[col] = df_cat[col].str[-1]
+    if verbose:
+        print(df_cat.head())
+    df = pd.concat([df, df_cat], axis=1).drop(columns=['categories'])
+    if verbose:
+        print(df.head())
+    return df    
+
 def clean_data(df):
-    pass
+    df = clean_duplicates(df)
+    df = clean_missing_values(df)
+    df = create_dummies(df)
+
+    return df
 
 
 def save_data(df, database_filename):
