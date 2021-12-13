@@ -1,5 +1,6 @@
 import sys
 import pandas as pd
+import sqlite3
 
 
 def load_data(messages_filepath, categories_filepath):
@@ -105,7 +106,10 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
-    pass  
+    conn = sqlite3.connect(database_filename)
+    df.to_sql('messages', con=conn, if_exists='replace', index=False)
+    conn.commit()
+    conn.close()
 
 
 def main():
