@@ -18,7 +18,7 @@ def load_data(messages_filepath, categories_filepath):
     #df = pd.concat([df_msg, df_cat], axis=1)
     df = df_msg.join(df_cat, how='outer', rsuffix='_cat')
 
-    if verbose:
+    if debug:
         print(f'\n        messages shape: {df_msg.shape}\n        categories shape: {df_cat.shape}\n        joined shape: {df.shape}\n')
     return df
 
@@ -26,13 +26,13 @@ def load_data(messages_filepath, categories_filepath):
 def clean_duplicates(df):
     print('    duplicates...')
 
-    if verbose:
+    if debug:
         diff_ids = df[df['id']!=df['id_cat']].shape[0]
         print(f'\n{diff_ids} rows with different id and id_cat\n')
     # id == id_cat in all rows, so we can keep only id
     df = df.drop(columns=['id_cat'])
     
-    if verbose:
+    if debug:
         print(f'New joined shape: {df.shape}\n')
         double = df[df.duplicated(keep=False)]
         print(f'Full duplicates:\n {double}\n')
@@ -43,11 +43,11 @@ def clean_duplicates(df):
     # Drop full duplicates
     df = df.drop_duplicates().reset_index(drop=True)
 
-    if verbose:
+    if debug:
         print(f'\nNo full duplicates shape: {df.shape}\n')
     
     df_dupl_id = df[df.duplicated(subset=['id'], keep=False)]
-    if verbose:
+    if debug:
         print('Duplicates in id:')
         print(df_dupl_id)
         print('Duplicates, the difference only in "categories":')
@@ -57,7 +57,7 @@ def clean_duplicates(df):
     # Duplicates, the difference only in "categories"
 
 
-    #if verbose:
+    #if debug:
         #dupl_ids = list(df_dupl_id['id'])
         #print(f'\n{len(dupl_ids)}:  {dupl_ids}')
         #print(f'\n{len(list(set(dupl_ids)))}:  {dupl_ids}')
@@ -66,7 +66,7 @@ def clean_duplicates(df):
 
 def clean_missing_values(df):
     print('    missing values...')
-    if verbose:
+    if debug:
         print(df.isnull().sum())
 
     return df    
@@ -74,26 +74,26 @@ def clean_missing_values(df):
 def create_dummies(df):
     print('    categorical variables (creating dummies)...')
     df = pd.concat([df, pd.get_dummies(df['genre'])], axis=1).drop(columns=['genre'])
-    if verbose:
+    if debug:
         print(df.head())
  
     categories = df.loc[0,'categories'].replace('-0', '').replace('-1', '').split(';')
-    if verbose:
+    if debug:
         print(f'\n{len(categories)} categories:\n{categories}\n')
     df_cat = df['categories'].str.split(';', expand=True)
     col_dict = {i:categories[i] for i in range(36)}
-    if verbose:
+    if debug:
         print(f'\nDictionary of category columns:\n{col_dict}\n')
     df_cat = df_cat.rename(columns=col_dict)
-    if verbose:
+    if debug:
         print(df_cat.head())
 
     for col in df_cat.columns:
         df_cat[col] = df_cat[col].str[-1]
-    if verbose:
+    if debug:
         print(df_cat.head())
     df = pd.concat([df, df_cat], axis=1).drop(columns=['categories'])
-    if verbose:
+    if debug:
         print(df.head())
     return df    
 
@@ -116,9 +116,9 @@ def main():
     if len(sys.argv) >= 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:4]
-        if len(sys.argv) == 5 and sys.argv[4] == 'verbose':
-            global verbose
-            verbose = True
+        if len(sys.argv) == 5 and sys.argv[4] == 'debug':
+            global debug
+            debug = True
 
         print('\nLoading data...\n    MESSAGES: {}\n    CATEGORIES: {}'
               .format(messages_filepath, categories_filepath))
@@ -142,6 +142,6 @@ def main():
             'disaster_messages.csv disaster_categories.csv DisasterResponse.db')
 
 
-verbose = False
+debug = False
 if __name__ == '__main__':
     main()
