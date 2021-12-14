@@ -2,7 +2,8 @@ import sys
 
 
 def load_data(database_filepath):
-    pass
+    X, Y, category_names = (None,None,None)
+    return X, Y, category_names
 
 
 def tokenize(text):
@@ -22,10 +23,15 @@ def save_model(model, model_filepath):
 
 
 def main():
-    if len(sys.argv) == 3:
-        database_filepath, model_filepath = sys.argv[1:]
+    if len(sys.argv) >= 3:
+        database_filepath, model_filepath = sys.argv[1:3]
+        if len(sys.argv) == 4 and sys.argv[3] == 'debug':
+            global debug
+            debug = True
+
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
+        return
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
         
         print('Building model...')
@@ -43,11 +49,14 @@ def main():
         print('Trained model saved!')
 
     else:
-        print('Please provide the filepath of the disaster messages database '\
-              'as the first argument and the filepath of the pickle file to '\
-              'save the model to as the second argument. \n\nExample: python '\
-              'train_classifier.py ../data/DisasterResponse.db classifier.pkl')
+        print('Missing arguments.\n\n'\
+            'Usage: python train_classifier.py DB_PATH MODEL_PATH \n\n'\
+            '   DB_PATH      the filepath of the disaster messages database\n'
+            '   MODEL_PATH   the filepath of the pickle file to save the model to\n\n\n'\
+            'Example: python train_classifier.py '\
+            '../data/DisasterResponse.db classifier.pkl')
 
 
+debug = False
 if __name__ == '__main__':
     main()
