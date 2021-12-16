@@ -1,7 +1,25 @@
 import sys
+import sqlite3
+import pandas as pd
 
 
 def load_data(database_filepath):
+    conn = sqlite3.connect(database_filepath)
+
+    # get a cursor
+    cur = conn.cursor()
+
+    # load data
+    df = pd.read_sql("SELECT * FROM messages", con=conn)
+
+    conn.commit()
+    conn.close()
+
+    if debug:
+        print(f'\nShape: {df.shape}')
+        print(df.info())
+        print(df.head())
+
     X, Y, category_names = (None,None,None)
     return X, Y, category_names
 
