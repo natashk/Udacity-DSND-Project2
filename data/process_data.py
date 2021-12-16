@@ -89,12 +89,13 @@ def create_dummies(df):
         print(df_cat.head())
 
     for col in df_cat.columns:
-        df_cat[col] = df_cat[col].str[-1]
+        df_cat[col] = df_cat[col].str[-1].astype(int)
     if debug:
         print(df_cat.head())
     df = pd.concat([df, df_cat], axis=1).drop(columns=['categories'])
     if debug:
         print(df.head())
+        print(df.info())
     return df    
 
 def clean_data(df):
