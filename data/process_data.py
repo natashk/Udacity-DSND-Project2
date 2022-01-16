@@ -14,8 +14,6 @@ def load_data(messages_filepath, categories_filepath):
     '''
     df_msg = pd.read_csv(messages_filepath)
     df_cat = pd.read_csv(categories_filepath)
-    #df = df_msg.join(df_cat.set_index('id'), on='id')
-    #df = pd.concat([df_msg, df_cat], axis=1)
     df = df_msg.join(df_cat, how='outer', rsuffix='_cat')
 
     if debug:
@@ -24,6 +22,13 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_duplicates(df):
+    '''
+    INPUT:
+    df - DataFrame
+
+    OUTPUT:
+    df - DataFrame, with removed duplicates
+    '''
     print('    duplicates...')
 
     if debug:
@@ -64,41 +69,90 @@ def clean_duplicates(df):
 
     return df
 
+
 def clean_missing_values(df):
+    '''
+    INPUT:
+    df - DataFrame
+
+    OUTPUT:
+    df - DataFrame, with cleaned missing values
+    '''
+
+    '''
+    TODO: no category for the message => remove!
+    '''
     print('    missing values...')
     if debug:
         print(df.isnull().sum())
+    # No missing values
 
     return df    
 
+
 def create_dummies(df):
+    '''
+    INPUT:
+    df - DataFrame
+
+    OUTPUT:
+    df - DataFrame, with dummies for categorical variables
+    '''
+
     print('    categorical variables (creating dummies)...')
     df = pd.concat([df, pd.get_dummies(df['genre'])], axis=1).drop(columns=['genre'])
     if debug:
         print(df.head())
  
+    # Create categories list
     categories = df.loc[0,'categories'].replace('-0', '').replace('-1', '').split(';')
     if debug:
         print(f'\n{len(categories)} categories:\n{categories}\n')
+    # Split 'categories' column into single category columns
     df_cat = df['categories'].str.split(';', expand=True)
-    col_dict = {i:categories[i] for i in range(36)}
+
+    col_dict = {i:categories[i] for i in range(len(categories))}
     if debug:
         print(f'\nDictionary of category columns:\n{col_dict}\n')
     df_cat = df_cat.rename(columns=col_dict)
     if debug:
         print(df_cat.head())
 
+    # Convert values to Integer
     for col in df_cat.columns:
         df_cat[col] = df_cat[col].str[-1].astype(int)
     if debug:
         print(df_cat.head())
+
+    # Fix values that are not 0 or 1
+    if debug:
+        for col in df_cat.columns:
+            print(df_cat[col].unique())
+    for col in df_cat.columns:
+        df_cat[col] = df_cat[col].apply(lambda x: x if x==0 else 1)
+    if debug:
+        print('Fixed category values')
+        for col in df_cat.columns:
+            print(df_cat[col].unique())
+
+    
+    # Add dummies to original df and drop original column
     df = pd.concat([df, df_cat], axis=1).drop(columns=['categories'])
     if debug:
         print(df.head())
         print(df.info())
     return df    
 
+
 def clean_data(df):
+    '''
+    INPUT:
+    df - DataFrame
+
+    OUTPUT:
+    df - DataFrame, cleaned
+    '''
+
     df = clean_duplicates(df)
     df = clean_missing_values(df)
     df = create_dummies(df)
@@ -107,6 +161,12 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    '''
+    INPUT:
+    df - DataFrame
+    database_filename - string, the filepath of the database to save the cleaned data
+    '''
+
     conn = sqlite3.connect(database_filename)
     df.to_sql('messages', con=conn, if_exists='replace', index=False)
     conn.commit()
