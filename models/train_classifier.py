@@ -6,22 +6,27 @@ nltk.download('maxent_ne_chunker')
 nltk.download('words')
 nltk.download('stopwords')
 
+import time
 import sys
 import sqlite3
 import pandas as pd
 import re
-from nltk import pos_tag, ne_chunk
+#from nltk import pos_tag, ne_chunk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+#from sklearn.metrics import f1_score
+#from sklearn.metrics import precision_recall_fscore_support
+from sklearn.metrics import classification_report
 
 
 def load_data(database_filepath):
     conn = sqlite3.connect(database_filepath)
-
-    # get a cursor
-    cur = conn.cursor()
 
     # load data
     df = pd.read_sql("SELECT * FROM messages", con=conn)
@@ -36,11 +41,11 @@ def load_data(database_filepath):
 
     category_names = list(df.columns[6:])
     X = df['message'].values
-    Y = df[category_names]
+    Y = df[category_names].values
     if debug:
         print(f'{len(category_names)} category names:\n{category_names}' )
-        print(len(X))
-        print(Y.head(3),'\n',Y.shape)
+        print(len(X),'\n',len(Y))
+        print(Y)
     return X, Y, category_names
 
 
@@ -75,7 +80,15 @@ def build_model():
     # create gridsearch object and return as final model pipeline
 
     """
-    pass
+    # text processing and model pipeline
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    return pipeline
+
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
@@ -84,7 +97,11 @@ def evaluate_model(model, X_test, Y_test, category_names):
     Report the f1 score, precision and recall for each output category of the dataset. You can do
     this by iterating through the columns and calling sklearn's classification_report on each.
     """
-    pass
+    y_pred = model.predict(X_test)
+    #f1 = precision_recall_fscore_support(Y_test, y_pred, average=None, labels=category_names)
+    #print(f'f1 score:\n{f1}')
+    #print(classification_report(np.argmax(Y_test,axis=1), np.argmax(y_pred,axis=1), target_names=category_names, zero_division=0))
+    print(classification_report(Y_test, y_pred, target_names=category_names, zero_division=0))
 
 
 def save_model(model, model_filepath):
@@ -92,6 +109,14 @@ def save_model(model, model_filepath):
     9. Export your model as a pickle file
     """
     pass
+
+
+def test_tokenize(X):
+    # test out function
+    for message in X[:5]:
+        tokens = tokenize(message)
+        print(message)
+        print(tokens, '\n')
 
 
 def main():
@@ -104,23 +129,26 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
 
-        # test out function
-        for message in X[:5]:
-            tokens = tokenize(message)
-            print(message)
-            print(tokens, '\n')
+        if debug:
+            test_tokenize(X)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
+        X_train, X_test, Y_train, Y_test = train_test_split(X[:10000], Y[:10000], test_size=0.2) 
+        print(X_train[:10])
+        print(Y_train[:10])
         
         print('Building model...')
-        return
         model = build_model()
         
         print('Training model...')
+        start = time.time()
         model.fit(X_train, Y_train)
+        end = time.time()
+        if debug:
+            print(f'{(end - start)//60} min {(end - start)%60} sec ({end - start} sec)')
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
+        return
         """
         6. Improve your model
         Use grid search to find better parameters.
