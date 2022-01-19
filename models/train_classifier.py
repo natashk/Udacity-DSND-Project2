@@ -23,6 +23,10 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 #from sklearn.metrics import f1_score
 #from sklearn.metrics import precision_recall_fscore_support
 from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+import pickle
+
+
 
 
 def load_data(database_filepath):
@@ -70,6 +74,9 @@ def build_model():
     results on the other 36 categories in the dataset. You may find the MultiOutputClassifier helpful
     for predicting multiple target variables.
 
+    6. Improve your model
+    Use grid search to find better parameters.
+
 
     # text processing and model pipeline
 
@@ -87,6 +94,13 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
 
+    parameters = {
+        'clf__estimator__n_estimators': [50, 100, 150],
+        'clf__estimator__min_samples_split': [3, 4, 5],
+        'clf__estimator__max_depth': [None, 25, 30]
+    }
+    pipeline = GridSearchCV(pipeline, param_grid=parameters)
+
     return pipeline
 
 
@@ -102,14 +116,17 @@ def evaluate_model(model, X_test, Y_test, category_names):
     #print(f'f1 score:\n{f1}')
     #print(classification_report(np.argmax(Y_test,axis=1), np.argmax(y_pred,axis=1), target_names=category_names, zero_division=0))
     print(classification_report(Y_test, y_pred, target_names=category_names, zero_division=0))
+    print(f'Accuracy: {(y_pred==Y_test).mean()}')
+    print("\nBest Parameters:", model.best_params_)
+
 
 
 def save_model(model, model_filepath):
     """
     9. Export your model as a pickle file
     """
-    pass
-
+    with open(model_filepath, 'wb') as file:  
+        pickle.dump(model, file)
 
 def test_tokenize(X):
     # test out function
@@ -132,27 +149,27 @@ def main():
         if debug:
             test_tokenize(X)
 
-        X_train, X_test, Y_train, Y_test = train_test_split(X[:10000], Y[:10000], test_size=0.2) 
+        X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2) 
         print(X_train[:10])
         print(Y_train[:10])
         
         print('Building model...')
+        start = time.time()
         model = build_model()
+        end = time.time()
+        if debug:
+            print(f'{int((end - start)//60)} min {int((end - start)%60)} sec ({end - start} sec)')
         
         print('Training model...')
         start = time.time()
         model.fit(X_train, Y_train)
         end = time.time()
         if debug:
-            print(f'{(end - start)//60} min {(end - start)%60} sec ({end - start} sec)')
+            print(f'{int((end - start)//60)} min {int((end - start)%60)} sec ({end - start} sec)')
         
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
-        return
         """
-        6. Improve your model
-        Use grid search to find better parameters.
-
         7. Test your model
         Show the accuracy, precision, and recall of the tuned model.
 
