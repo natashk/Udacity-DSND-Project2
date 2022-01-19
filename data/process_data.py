@@ -79,9 +79,6 @@ def clean_missing_values(df):
     df - DataFrame, with cleaned missing values
     '''
 
-    '''
-    TODO: no category for the message => remove!
-    '''
     print('    missing values...')
     if debug:
         print(df.isnull().sum())
@@ -144,6 +141,25 @@ def create_dummies(df):
     return df    
 
 
+def clean_missing_categories(df):
+    '''
+    INPUT:
+    df - DataFrame
+
+    OUTPUT:
+    df - DataFrame, with removed uncategorized messages
+    '''
+
+    # If no category defined for the message, then that record will not help in classification, so we need to remove it.
+    
+    if debug:
+        print(f'\nUncategorized:\n{df[df.iloc[:,-36:].sum(axis=1)==0]}')
+    df = df.drop(df[df.iloc[:,-36:].sum(axis=1)==0].index)
+    if debug:
+        print(df.shape)
+    return df
+
+
 def clean_data(df):
     '''
     INPUT:
@@ -156,6 +172,7 @@ def clean_data(df):
     df = clean_duplicates(df)
     df = clean_missing_values(df)
     df = create_dummies(df)
+    df = clean_missing_categories(df)
 
     return df
 
