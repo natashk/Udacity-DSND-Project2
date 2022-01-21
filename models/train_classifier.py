@@ -1,8 +1,8 @@
 # download necessary NLTK data
 import nltk
 nltk.download(['punkt', 'wordnet'])
-nltk.download('averaged_perceptron_tagger')
-nltk.download('maxent_ne_chunker')
+#nltk.download('averaged_perceptron_tagger')
+#nltk.download('maxent_ne_chunker')
 nltk.download('words')
 nltk.download('stopwords')
 
@@ -95,9 +95,9 @@ def build_model():
     ])
 
     parameters = {
-        'clf__estimator__n_estimators': [50, 100, 150],
-        'clf__estimator__min_samples_split': [3, 4, 5],
-        'clf__estimator__max_depth': [None, 25, 30]
+        'clf__estimator__n_estimators': [20, 30, 40],
+        'clf__estimator__min_samples_split': [3, 4],
+        'clf__estimator__max_depth': [None, 25]
     }
     pipeline = GridSearchCV(pipeline, param_grid=parameters)
 
@@ -112,9 +112,6 @@ def evaluate_model(model, X_test, Y_test, category_names):
     this by iterating through the columns and calling sklearn's classification_report on each.
     """
     y_pred = model.predict(X_test)
-    #f1 = precision_recall_fscore_support(Y_test, y_pred, average=None, labels=category_names)
-    #print(f'f1 score:\n{f1}')
-    #print(classification_report(np.argmax(Y_test,axis=1), np.argmax(y_pred,axis=1), target_names=category_names, zero_division=0))
     print(classification_report(Y_test, y_pred, target_names=category_names, zero_division=0))
     print(f'Accuracy: {(y_pred==Y_test).mean()}')
     print("\nBest Parameters:", model.best_params_)
