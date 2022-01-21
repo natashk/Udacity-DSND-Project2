@@ -1,1 +1,1 @@
-web: gunicorn cd app && run:app
+web: gunicorn app/run:app
