@@ -95,7 +95,7 @@ def build_model():
     ])
 
     parameters = {
-        'clf__estimator__n_estimators': [20, 30, 40],
+        'clf__estimator__n_estimators': [5, 10],
         'clf__estimator__min_samples_split': [3, 4],
         'clf__estimator__max_depth': [None, 25]
     }
