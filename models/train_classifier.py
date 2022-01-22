@@ -1,20 +1,21 @@
-# download necessary NLTK data
-import nltk
-nltk.download(['punkt', 'wordnet'])
-#nltk.download('averaged_perceptron_tagger')
-#nltk.download('maxent_ne_chunker')
-nltk.download('words')
-nltk.download('stopwords')
+## download necessary NLTK data
+#import nltk
+#nltk.download(['punkt', 'wordnet'])
+##nltk.download('averaged_perceptron_tagger')
+##nltk.download('maxent_ne_chunker')
+#nltk.download('words')
+#nltk.download('stopwords')
 
+from tokenization import tokenize
 import time
 import sys
 import sqlite3
 import pandas as pd
-import re
-#from nltk import pos_tag, ne_chunk
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
+#import re
+##from nltk import pos_tag, ne_chunk
+#from nltk.tokenize import word_tokenize
+#from nltk.corpus import stopwords
+#from nltk.stem import WordNetLemmatizer
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.multioutput import MultiOutputClassifier
@@ -53,6 +54,7 @@ def load_data(database_filepath):
     return X, Y, category_names
 
 
+"""
 def tokenize(text):
     # tokenize text
     #tokens = ne_chunk(pos_tag(word_tokenize(text)))
@@ -66,6 +68,8 @@ def tokenize(text):
     tokens = [WordNetLemmatizer().lemmatize(token) for token in tokens if token not in stop_words]
 
     return tokens
+"""
+
 
 def build_model():
     """
@@ -122,7 +126,7 @@ def save_model(model, model_filepath):
     """
     9. Export your model as a pickle file
     """
-    with open(model_filepath, 'wb') as file:  
+    with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 
 def test_tokenize(X):

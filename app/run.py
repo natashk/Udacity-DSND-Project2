@@ -1,9 +1,17 @@
+import sys
+for p in sys.path:
+    print( p )
+sys.path.append( '../models' )
+for p in sys.path:
+    print( p )
+from tokenization import tokenize
+
 import json
 import plotly
 import pandas as pd
 
-from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+#from nltk.stem import WordNetLemmatizer
+#from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -14,6 +22,7 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
+"""
 def tokenize(text):
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
@@ -24,6 +33,7 @@ def tokenize(text):
         clean_tokens.append(clean_tok)
 
     return clean_tokens
+"""
 
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
