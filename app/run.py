@@ -7,8 +7,9 @@ import plotly
 import pandas as pd
 
 from flask import Flask
-from flask import render_template, request, jsonify
+from flask import render_template, request
 from plotly.graph_objs import Bar
+from plotly.graph_objs import Box
 import joblib
 from sqlalchemy import create_engine
 
@@ -31,31 +32,91 @@ def index():
     
     # extract data needed for visuals
     category_counts = list(df.iloc[:,-36:].sum(axis=0))
-    category_names = list(df.columns[6:])
+    category_names = list(df.columns[6:].str.replace('_',' '))
     
+    genre_counts = list(df.iloc[:,3:6].sum(axis=0))
+    genre_names = list(df.columns[3:6])
+
+    direct_len = list(df[df['direct']==1].message.str.len())
+    news_len = list(df[df['news']==1].message.str.len())
+    social_len = list(df[df['social']==1].message.str.len())
+
     # create visuals
     graphs = [
         {
             'data': [
                 Bar(
                     x=category_names,
-                    y=category_counts
+                    y=category_counts,
+                    texttemplate='%{y:.2s}',
+                    text=category_counts,
+                    textposition='outside'
                 )
             ],
 
             'layout': {
                 'title': 'Distribution of Message Categories',
                 'yaxis': {
-                    'title': "Count"
+                    'title': "Count",
+                    'automargin': 1,
                 },
                 'xaxis': {
                     'title': "Category",
-                    'tickangle': 60
+                    'tickangle': 60,
+                    'categoryorder':'total descending'
                 },
+                'height': 500,
                 'margin': {
-                    'b':200
+                    't': 50,
+                    'b': 150
                 }
 
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=genre_names,
+                    y=genre_counts,
+                    texttemplate='%{y:.2s}',
+                    text=category_counts,
+                    textposition='inside'
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message Genres',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Genre"
+                },
+                'margin': {
+                    't': 50,
+                    'b':100
+                }
+
+            }
+        },
+        {
+            'data': [
+                Box(
+                    name='direct',
+                    x=direct_len,
+                ),
+                Box(
+                    name='news',
+                    x=news_len,
+                ),
+                Box(
+                    name='social',
+                    x=social_len,
+                )
+            ],
+            'layout': {
+                'title': 'Length of Message by Genre',
+                'height': 700
             }
         }
     ]
@@ -86,8 +147,8 @@ def go():
 
 
 def main():
-    #app.run(host='0.0.0.0', port=3001, debug=True)
-    app.run()
+    app.run(host='0.0.0.0', port=3001)
+    #app.run()
 
 
 if __name__ == '__main__':
