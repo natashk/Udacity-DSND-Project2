@@ -1,8 +1,6 @@
 # download necessary NLTK data
 import nltk
 nltk.download(['punkt', 'wordnet'])
-#nltk.download('averaged_perceptron_tagger')
-#nltk.download('maxent_ne_chunker')
 nltk.download('words')
 nltk.download('stopwords')
 
@@ -13,8 +11,14 @@ from nltk.stem import WordNetLemmatizer
 
 
 def tokenize(text):
-    # tokenize text
-    #tokens = ne_chunk(pos_tag(word_tokenize(text)))
+    '''
+    INPUT:
+    text - string, to be tokenized
+
+    OUTPUT:
+    tokens - list of normalized and lemmatized tokens
+    '''
+
     stop_words = stopwords.words("english")
 
     # Normalize text

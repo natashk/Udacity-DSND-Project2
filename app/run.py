@@ -1,17 +1,10 @@
 import sys
-for p in sys.path:
-    print( p )
 sys.path.append( '../models' )
-for p in sys.path:
-    print( p )
 from tokenization import tokenize
 
 import json
 import plotly
 import pandas as pd
-
-#from nltk.stem import WordNetLemmatizer
-#from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
@@ -22,18 +15,6 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
-"""
-def tokenize(text):
-    tokens = word_tokenize(text)
-    lemmatizer = WordNetLemmatizer()
-
-    clean_tokens = []
-    for tok in tokens:
-        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
-        clean_tokens.append(clean_tok)
-
-    return clean_tokens
-"""
 
 # load data
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
@@ -43,7 +24,7 @@ df = pd.read_sql_table('messages', engine)
 model = joblib.load("../models/classifier.pkl")
 
 
-# index webpage displays cool visuals and receives user input text for model
+# index webpage displays visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
 def index():
@@ -97,7 +78,6 @@ def go():
     classification_labels = model.predict([query])[0]
     classification_results = dict(zip(df.columns[6:], classification_labels))
 
-    # This will render the go.html Please see that file. 
     return render_template(
         'go.html',
         query=query,

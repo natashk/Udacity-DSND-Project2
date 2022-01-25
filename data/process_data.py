@@ -12,6 +12,7 @@ def load_data(messages_filepath, categories_filepath):
     OUTPUT:
     df - DataFrame, joined data from both datasets
     '''
+
     df_msg = pd.read_csv(messages_filepath)
     df_cat = pd.read_csv(categories_filepath)
     df = df_msg.join(df_cat, how='outer', rsuffix='_cat')
@@ -29,6 +30,7 @@ def clean_duplicates(df):
     OUTPUT:
     df - DataFrame, with removed duplicates
     '''
+
     print('    duplicates...')
 
     if debug:
@@ -41,9 +43,6 @@ def clean_duplicates(df):
         print(f'New joined shape: {df.shape}\n')
         double = df[df.duplicated(keep=False)]
         print(f'Full duplicates:\n {double}\n')
-        #double.to_csv('double.csv')
-        #print(df_msg[df_msg['id']==24779])
-        #print(df_cat[df_cat['id']==24779])
 
     # Drop full duplicates
     df = df.drop_duplicates().reset_index(drop=True)
@@ -57,15 +56,6 @@ def clean_duplicates(df):
         print(df_dupl_id)
         print('Duplicates, the difference only in "categories":')
         print(df[df.duplicated(subset=['id','message','original','genre'], keep=False)])
-
-
-    # Duplicates, the difference only in "categories"
-
-
-    #if debug:
-        #dupl_ids = list(df_dupl_id['id'])
-        #print(f'\n{len(dupl_ids)}:  {dupl_ids}')
-        #print(f'\n{len(list(set(dupl_ids)))}:  {dupl_ids}')
 
     return df
 
@@ -108,6 +98,7 @@ def create_dummies(df):
     # Split 'categories' column into single category columns
     df_cat = df['categories'].str.split(';', expand=True)
 
+    # Rename columns
     col_dict = {i:categories[i] for i in range(len(categories))}
     if debug:
         print(f'\nDictionary of category columns:\n{col_dict}\n')
@@ -131,7 +122,6 @@ def create_dummies(df):
         print('Fixed category values')
         for col in df_cat.columns:
             print(df_cat[col].unique())
-
     
     # Add dummies to original df and drop original column
     df = pd.concat([df, df_cat], axis=1).drop(columns=['categories'])
@@ -151,7 +141,6 @@ def clean_missing_categories(df):
     '''
 
     # If no category defined for the message, then that record will not help in classification, so we need to remove it.
-    
     if debug:
         print(f'\nUncategorized:\n{df[df.iloc[:,-36:].sum(axis=1)==0]}')
     df = df.drop(df[df.iloc[:,-36:].sum(axis=1)==0].index)
@@ -182,6 +171,9 @@ def save_data(df, database_filename):
     INPUT:
     df - DataFrame
     database_filename - string, the filepath of the database to save the cleaned data
+
+    OUTPUT:
+    Saves cleaned data in SQLite database
     '''
 
     conn = sqlite3.connect(database_filename)
