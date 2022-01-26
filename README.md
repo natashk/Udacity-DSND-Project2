@@ -31,6 +31,8 @@ Link to Flask web app, deployed on Heroku: https://nat-disaster-response.herokua
 ### Web app screenshots
 ![Overview of Dataset](screenshots/1.png)
 
+---
+
 ![Category prediction](screenshots/2.png)
 
 
