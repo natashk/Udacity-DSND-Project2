@@ -79,6 +79,6 @@ Link to Flask web app, deployed on Heroku: https://nat-disaster-response.herokua
 
 ### Acknowledgments
 
-https://stackoverflow.com/questions/38851564/heroku-gunicorn-procfile
-https://rebeccabilbro.github.io/module-main-has-no-attribute/
-https://csatlas.com/python-import-file-module/
+https://stackoverflow.com/questions/38851564/heroku-gunicorn-procfile  
+https://rebeccabilbro.github.io/module-main-has-no-attribute/  
+https://csatlas.com/python-import-file-module/  
