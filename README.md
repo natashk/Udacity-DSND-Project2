@@ -7,7 +7,7 @@
 
 This project uses two data sets. One is with real messages, that were sent during disaster events, the other is with categories for them. The project analyzes data and builds a machine learning pipeline for an API that classifies disaster messages.  
 
-Link to Flask web app, deployed on Heroku: https://nat-disaster-response.herokuapp.com/ 
+Link to deployed Flask web app: https://nat13.pythonanywhere.com/dr 
 
 #### The project consists of the following components:
 
@@ -76,9 +76,3 @@ Link to Flask web app, deployed on Heroku: https://nat-disaster-response.herokua
     - README.md                  # project description
     - requirements.txt           # required libraries
 
-
-### Acknowledgments
-
-https://stackoverflow.com/questions/38851564/heroku-gunicorn-procfile  
-https://rebeccabilbro.github.io/module-main-has-no-attribute/  
-https://csatlas.com/python-import-file-module/  
